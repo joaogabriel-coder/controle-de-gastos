@@ -8,6 +8,9 @@ COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
 
+# Dá permissão de execução para o gradlew
+RUN chmod +x gradlew
+
 # Faz download das dependências para cache
 RUN ./gradlew dependencies --no-daemon || return 0
 
@@ -16,7 +19,6 @@ COPY src ./src
 
 # Gera o JAR (sem rodar os testes)
 RUN ./gradlew clean build -x test --no-daemon
-
 # Estagio 2: Imagem Final de Execucao
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
