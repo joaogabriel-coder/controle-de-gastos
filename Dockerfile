@@ -1,12 +1,21 @@
-# Estagio 1: Build da Aplicacao com Maven
+# Estagio 1: Build da Aplicacao com Gradle
 FROM eclipse-temurin:21-jdk-jammy as builder
 WORKDIR /app
-COPY .mvn/ .mvn
-COPY mvnw .
-COPY pom.xml .
-RUN ./mvnw dependency:go-offline
+
+# Copia os arquivos do Gradle wrapper e configs
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle .
+COPY settings.gradle .
+
+# Faz download das dependências para cache
+RUN ./gradlew dependencies --no-daemon || return 0
+
+# Copia o código fonte
 COPY src ./src
-RUN ./mvnw clean package -DskipTests
+
+# Gera o JAR (sem rodar os testes)
+RUN ./gradlew clean build -x test --no-daemon
 
 # Estagio 2: Imagem Final de Execucao
 FROM eclipse-temurin:21-jre-jammy
